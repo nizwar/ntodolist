@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todolist/core/providers/userProvider.dart';
-import 'package:todolist/core/resources/myColors.dart';
 import 'package:todolist/ui/components/customDivider.dart';
 import 'package:todolist/ui/components/customImage.dart';
 

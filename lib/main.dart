@@ -16,6 +16,11 @@ main() {
         ChangeNotifierProvider(create: (context) => UserProvider()),
       ],
       child: MaterialApp(
+        localizationsDelegates: [
+          DefaultMaterialLocalizations.delegate,
+        ],
+        supportedLocales: [Locale("en", "US")],
+        locale: Locale("en", "US"),
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primaryColor: primaryColor,

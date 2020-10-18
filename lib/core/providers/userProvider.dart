@@ -17,12 +17,13 @@ class UserProvider extends ChangeNotifier {
   }
 
   static Future<String> autoLogin(BuildContext context) => Preferences.instance().then((value) async {
+        print(value.uid);
         try {
           final resp = await FirebaseFirestore.instance.collection("users").where("uid", isEqualTo: value.uid).get();
-          print(resp.docs.first.data());
+          // print(resp.docs.first.data());
           UserProvider.instance(context).user = MinUser.fromJson(resp.docs.first.data());
           return null;
-        } on FirebaseException catch (e) {
+        } catch (e) {
           return e.message;
         }
       });
@@ -52,7 +53,6 @@ class UserProvider extends ChangeNotifier {
   static _saveUserInfo(BuildContext context, UserCredential credential) async {
     final collection = FirebaseFirestore.instance.collection("users");
     final qs = await collection.where("uid", isEqualTo: credential.user.uid).get();
-    MinUser user = MinUser.fromJson(qs.docs.first.data());
     if (qs.size == 0) {
       await collection.add({
         "email": credential.user.email,
@@ -62,6 +62,12 @@ class UserProvider extends ChangeNotifier {
       });
     }
 
+    MinUser user = MinUser(
+      email: credential.user.email,
+      fullname: credential.user.displayName,
+      photo: credential.user.photoURL,
+      uid: credential.user.uid,
+    );
     Preferences.instance().then((value) {
       value.uid = user.uid;
     });

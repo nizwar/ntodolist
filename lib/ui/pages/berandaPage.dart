@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:todolist/core/providers/userProvider.dart';
 import 'package:todolist/core/utils/navigations.dart';
-import 'package:todolist/ui/components/customCard.dart';
 import 'package:todolist/ui/components/customImage.dart';
 import 'package:todolist/ui/components/loadingWidget.dart';
 import 'package:todolist/ui/components/messageWidget.dart';
@@ -18,49 +18,50 @@ class BerandaPage extends StatelessWidget {
           "user",
           isEqualTo: UserProvider.instance(context).user.email,
         )
-        .where("friends", arrayContains: UserProvider.instance(context).user.email)
+        .firestore
+        .collection("todo")
+        .where("friends." + UserProvider.instance(context).user.email)
         .snapshots();
-
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         SliverAppBar(
           backgroundColor: Colors.red,
           elevation: 0,
-          expandedHeight: 200,
+          // expandedHeight: 200,
           pinned: true,
-          flexibleSpace: FlexibleSpaceBar(
-            titlePadding: EdgeInsets.only(),
-            background: Center(
-              child: Container(
-                margin: EdgeInsets.only(top: 70),
-                height: 200,
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.red,
-                      Colors.orange,
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                ),
-                child: CustomCard(
-                  margin: EdgeInsets.all(30),
-                  padding: EdgeInsets.all(10),
-                  child: Center(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text("Today Reminder!", style: Theme.of(context).textTheme.headline6),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // flexibleSpace: FlexibleSpaceBar(
+          //   titlePadding: EdgeInsets.only(),
+          //   background: Center(
+          //     child: Container(
+          //       margin: EdgeInsets.only(top: 70),
+          //       height: 200,
+          //       width: MediaQuery.of(context).size.width,
+          //       decoration: BoxDecoration(
+          //         gradient: LinearGradient(
+          //           colors: [
+          //             Colors.red,
+          //             Colors.orange,
+          //           ],
+          //           begin: Alignment.topCenter,
+          //           end: Alignment.bottomCenter,
+          //         ),
+          //       ),
+          //       child: CustomCard(
+          //         margin: EdgeInsets.all(30),
+          //         padding: EdgeInsets.all(10),
+          //         child: Center(
+          //           child: Column(
+          //             crossAxisAlignment: CrossAxisAlignment.stretch,
+          //             mainAxisSize: MainAxisSize.min,
+          //             children: [
+          //               Text("Today Reminder!", style: Theme.of(context).textTheme.headline6),
+          //             ],
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
           title: Consumer<UserProvider>(
             builder: (context, value, child) => Column(
               mainAxisSize: MainAxisSize.min,
@@ -94,8 +95,12 @@ class BerandaPage extends StatelessWidget {
             if (snapshot.data.size == 0) {
               return MessageWidget(title: "Tidak ada TASK!", subTitle: "Saat ini kamu belum memiliki task, ayo buat sekarang!");
             }
-            return Container(
-              child: Text(snapshot.data.docs.first.toString()),
+            return ListView(
+              children: snapshot.data.docs
+                  .map(
+                    (e) => TodoItem(data: e),
+                  )
+                  .toList(),
             );
           } else {
             return MessageWidget(title: "Gangguan!", subTitle: "Tidak dapat mengambil informasi task saat ini!");
@@ -107,5 +112,53 @@ class BerandaPage extends StatelessWidget {
 
   void _profileClick(BuildContext context) {
     startScreen(context, ProfileDetailScreen());
+  }
+}
+
+class TodoItem extends StatelessWidget {
+  final QueryDocumentSnapshot data;
+  const TodoItem({
+    Key key,
+    this.data,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final time = stringToTime(data["time"]);
+    print(time);
+    return ListTile(
+      leading: SizedBox(
+        height: 50,
+        width: 50,
+        child: Stack(
+          alignment: Alignment.center,
+          children: data["friends"] != null && data["friends"].keys.length > 0
+              ? List.generate(
+                  data["friends"].keys.length > 3 ? 3 : data["friends"].keys.length,
+                  (index) {
+                    Map<String, dynamic> friends = data["friends"];
+                    List<String> keys = friends.keys.toList();
+                    return Positioned(
+                      top: index.toDouble() * 6,
+                      left: index.toDouble() * 6,
+                      child: CustomImage(
+                        height: 40,
+                        width: 40,
+                        url: friends[keys[index]]["photo"],
+                      ),
+                    );
+                  },
+                )
+              : [SizedBox.shrink()],
+        ),
+      ),
+      title: Text(data["title"]),
+      subtitle: Text(data["date"] + " - " + data["time"]),
+    );
+  }
+
+  TimeOfDay stringToTime(String tod) {
+    final format = DateFormat.jm();
+    return TimeOfDay.fromDateTime(format.parse(tod));
   }
 }

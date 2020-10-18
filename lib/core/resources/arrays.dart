@@ -4,7 +4,7 @@ import 'package:todolist/core/models/tag.dart';
 List<Tag> tags = [
   Tag(
     title: "Personal",
-    color: Colors.yellow,
+    color: Colors.cyan,
   ),
   Tag(
     title: "Work",

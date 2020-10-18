@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart'; 
 import 'package:todolist/core/utils/utils.dart';
-import 'package:todolist/ui/components/taskForm.dart';
+import 'package:todolist/ui/screens/taskFormScreen.dart';
 import 'package:todolist/ui/pages/berandaPage.dart';
 import 'package:todolist/ui/pages/friendListPage.dart';
 
@@ -60,7 +60,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _addTaskClick() {
-    startScreen(context, TaskForm());
+    startScreen(context, TaskFormScreen());
   }
 
   void _changeIndex(index) {

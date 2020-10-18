@@ -17,9 +17,9 @@ class MessageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
+      child: ListView(
+        physics: BouncingScrollPhysics(),
+        shrinkWrap: true,
         children: [
           Image.asset(
             "assets/images/Clipboard.png",
